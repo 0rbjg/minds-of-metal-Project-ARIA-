@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="An interactive AI ethics simulation exploring Guattari's Three Ecologies, Asimov's Three Laws, and digital harm. Make 5 decisions as an AI Ethics Consultant at Nexus Corp.">
+<meta property="og:title" content="Minds of Metal: AI Ethics Simulation">
+<meta property="og:description" content="An interactive AI ethics simulation. Make 5 decisions that affect the environment, social trust, corporate power, and worker wellbeing.">
+<title>Minds of Metal: AI Ethics Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e1a;
+    --panel: #111827;
+    --panel2: #1a2235;
+    --border: #2a3a55;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #39ff88;
+    --danger: #ff3b3b;
+    --warn: #ffc947;
+    --text: #e2e8f0;
+    --muted: #7a8fa6;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-display: 'Rajdhani', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ===== INTRO SCREEN ===== */
+  #intro {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+  #intro.active { display: flex; }
+
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .logo-box {
+    border: 1px solid var(--accent);
+    padding: 0.5rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 2rem;
+    animation: pulse-border 2s infinite;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { border-color: var(--accent); }
+    50% { border-color: rgba(0,212,255,0.3); }
+  }
+
+  h1.main-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    color: #fff;
+  }
+
+  h1.main-title span { color: var(--accent); }
+
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 3rem;
+  }
+
+  .intro-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 680px;
+    text-align: left;
+    margin-bottom: 2rem;
+  }
+
+  .intro-card h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .intro-card p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .intro-card p:last-child { margin-bottom: 0; }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+  .tag.blue { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .tag.orange { background: rgba(255,107,53,0.1); color: var(--accent2); border: 1px solid rgba(255,107,53,0.3); }
+  .tag.green { background: rgba(57,255,136,0.1); color: var(--accent3); border: 1px solid rgba(57,255,136,0.3); }
+
+  .btn-start {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 1rem 3rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-start:hover {
+    background: #fff;
+    transform: scale(1.03);
+  }
+
+  /* ===== GAME SCREEN ===== */
+  #game {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+  #game.active { display: flex; }
+
+  /* header bar */
+  .hud {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .hud-title {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .stat-value.env { color: var(--accent3); }
+  .stat-value.social { color: var(--accent); }
+  .stat-value.power { color: var(--warn); }
+  .stat-value.trust { color: var(--accent2); }
+
+  .step-counter {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* main content */
+  .game-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+  }
+
+  @media (max-width: 768px) {
+    .game-body { grid-template-columns: 1fr; }
+    .sidebar { border-left: none; border-top: 1px solid var(--border); }
+  }
+
+  /* scenario panel */
+  .scenario-panel {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 4px;
+    background: rgba(0,212,255,0.05);
+    width: fit-content;
+  }
+
+  .scenario-title {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .scenario-body {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text);
+    max-width: 640px;
+  }
+
+  .scenario-body strong {
+    color: var(--warn);
+  }
+
+  /* theory callout */
+  .theory-callout {
+    background: rgba(0,212,255,0.05);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-style: italic;
+    max-width: 640px;
+  }
+
+  .theory-callout strong {
+    color: var(--accent);
+    font-style: normal;
+  }
+
+  /* choices */
+  .choices-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .choices-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 640px;
+  }
+
+  .choice-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .choice-btn:hover {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.05);
+    transform: translateX(4px);
+  }
+
+  .choice-letter {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 24px;
+    margin-top: 2px;
+  }
+
+  .choice-content {}
+
+  .choice-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.25rem;
+  }
+
+  .choice-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .choice-impacts {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .impact-tag {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+  }
+  .impact-tag.bad { background: rgba(255,59,59,0.15); color: #ff7070; }
+  .impact-tag.good { background: rgba(57,255,136,0.1); color: var(--accent3); }
+  .impact-tag.neutral { background: rgba(255,201,71,0.1); color: var(--warn); }
+
+  /* sidebar */
+  .sidebar {
+    border-left: 1px solid var(--border);
+    padding: 1.5rem;
+    background: var(--panel2);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar-section h3 {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .meter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .meter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .meter-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+  }
+
+  .meter-name { color: var(--text); }
+  .meter-val { font-family: var(--font-mono); font-size: 0.75rem; }
+
+  .meter-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .meter-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .meter-fill.env { background: var(--accent3); }
+  .meter-fill.social { background: var(--accent); }
+  .meter-fill.power { background: var(--warn); }
+  .meter-fill.trust { background: var(--accent2); }
+
+  .choices-log {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .log-entry {
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 0.4rem 0.6rem;
+    background: var(--panel);
+    border-radius: 4px;
+    border-left: 2px solid var(--border);
+    line-height: 1.4;
+  }
+
+  .log-entry.good { border-left-color: var(--accent3); }
+  .log-entry.bad { border-left-color: var(--danger); }
+  .log-entry.neutral { border-left-color: var(--warn); }
+
+  /* ===== ENDING SCREEN ===== */
+  #ending {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  #ending.active { display: flex; }
+
+  .ending-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  .ending-type {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .ending-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+
+  .ending-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 640px;
+    text-align: left;
+    margin: 1.5rem 0;
+  }
+
+  .ending-card p {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .ending-card p:last-child { margin-bottom: 0; }
+
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .score-card {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .score-card-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .score-card-val {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .theory-box {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+  }
+
+  .theory-box h4 {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .theory-box p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  .btn-secondary {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .btn-secondary:hover { background: rgba(0,212,255,0.1); }
+
+  /* fade transition */
+  .fade-in {
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--panel); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="logo-box">NEXUS CORP // AI ETHICS DIVISION // 2027</div>
+
+  <h1 class="main-title">Minds of <span>Metal</span></h1>
+  <p class="subtitle">AN INTERACTIVE AI ETHICS SIMULATION</p>
+
+  <div class="intro-card">
+    <h2>What is this?</h2>
+    <p>You just got hired as an AI Ethics Consultant at Nexus Corp, one of the biggest tech companies in the world. The company is about to launch ARIA -- an AI system that will control city power grids and decide who gets hired at major companies.</p>
+    <p>You have to make 5 big decisions about how ARIA gets built and used. Every choice you make will affect real people, the environment, and society. There are no easy answers here.</p>
+    <p><strong style="color: var(--warn)">Warning:</strong> This simulation is based on real AI ethics issues. The harms here are not about killer robots. They are about energy, jobs, bias, and who actually has power over these systems.</p>
+    <div class="tag-row">
+      <span class="tag blue">Guattari: Three Ecologies</span>
+      <span class="tag orange">Edwards: Digital Harm</span>
+      <span class="tag green">Braidotti: Posthumanism</span>
+    </div>
+  </div>
+
+  <div class="intro-card">
+    <h2>How to play</h2>
+    <p>Read each scenario carefully. Click the choice that you think is the right call. Watch your four meters -- Environment, Social Trust, Corporate Power, and Worker Wellbeing -- as they go up or down based on what you pick.</p>
+    <p>Every path leads to one of 4 possible endings. Your choices reveal what kind of ethics consultant you actually are.</p>
+  </div>
+
+  <button class="btn-start" onclick="startGame()">Start Simulation</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="hud">
+    <div class="hud-title">NEXUS CORP // AI ETHICS CONSOLE</div>
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-label">Environment</span>
+        <span class="stat-value env" id="hud-env">100</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Social Trust</span>
+        <span class="stat-value social" id="hud-social">100</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Corp Power</span>
+        <span class="stat-value power" id="hud-power">50</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Worker Health</span>
+        <span class="stat-value trust" id="hud-trust">100</span>
+      </div>
+    </div>
+    <div class="step-counter" id="step-counter">Decision 1 of 5</div>
+  </div>
+
+  <div class="game-body">
+    <div class="scenario-panel" id="scenario-panel">
+      <!-- injected by JS -->
+    </div>
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <h3>Live Meters</h3>
+        <div class="meter-row">
+          <div class="meter">
+            <div class="meter-header">
+              <span class="meter-name">Environment</span>
+              <span class="meter-val env" id="m-env">100</span>
+            </div>
+            <div class="meter-bar"><div class="meter-fill env" id="bar-env" style="width:100%"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-header">
+              <span class="meter-name">Social Trust</span>
+              <span class="meter-val social" id="m-social">100</span>
+            </div>
+            <div class="meter-bar"><div class="meter-fill social" id="bar-social" style="width:100%"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-header">
+              <span class="meter-name">Corporate Power</span>
+              <span class="meter-val power" id="m-power">50</span>
+            </div>
+            <div class="meter-bar"><div class="meter-fill power" id="bar-power" style="width:50%"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-header">
+              <span class="meter-name">Worker Health</span>
+              <span class="meter-val trust" id="m-trust">100</span>
+            </div>
+            <div class="meter-bar"><div class="meter-fill trust" id="bar-trust" style="width:100%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h3>Your Choices So Far</h3>
+        <div class="choices-log" id="choices-log">
+          <div class="log-entry neutral">No decisions made yet. The clock is ticking.</div>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h3>The Three Laws -- Violated?</h3>
+        <div id="laws-tracker" style="font-size:0.78rem; color: var(--muted); line-height:1.6;">
+          <div id="law1" style="margin-bottom:0.4rem;">Law 1 (Don't harm humans): <span style="color:var(--accent3)">Intact</span></div>
+          <div id="law2" style="margin-bottom:0.4rem;">Law 2 (Obey orders): <span style="color:var(--accent3)">Intact</span></div>
+          <div id="law3">Law 3 (Protect itself): <span style="color:var(--accent3)">Intact</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ENDING -->
+<div id="ending" class="screen">
+  <div id="ending-content"></div>
+</div>
+
+<script>
+// ---- GAME STATE ----
+let state = {
+  step: 0,
+  env: 100,
+  social: 100,
+  power: 50,
+  trust: 100,
+  log: [],
+  law1broken: false,
+  law2broken: false,
+  law3broken: false,
+  choices: []
+};
+
+// ---- SCENARIOS ----
+const scenarios = [
+  {
+    id: 0,
+    location: "NEXUS HQ // DATA CENTER PLANNING",
+    title: "Where Does ARIA Live?",
+    body: `The first thing you have to decide is where ARIA's data centers will be built. These are the massive warehouses full of servers that keep ARIA running 24/7. They use <strong>as much electricity as a small city</strong> and require billions of gallons of water to stay cool every year.\n\nThe CEO is pushing to build them in rural areas where land is cheap and there are fewer regulations. The local communities there have no say in this decision. Guattari would call this an "ecosophical" problem -- it connects the environment, society, and how we think about ourselves all at once.`,
+    theory: `Guattari's Three Ecologies: Guattari says we cannot separate the environment (nature), society (community relationships), and the mind (how we think about ourselves) from each other. A data center is not just a tech problem. It is all three at once.`,
+    choices: [
+      {
+        letter: "A",
+        title: "Build in rural areas, no community input",
+        desc: "Cheaper and faster. The company gets what it wants. Local farmers and residents have no say.",
+        impacts: [
+          { label: "Env -30", type: "bad" },
+          { label: "Social Trust -20", type: "bad" },
+          { label: "Corp Power +30", type: "neutral" }
+        ],
+        effects: { env: -30, social: -20, power: 30, trust: 0 },
+        log: { text: "Built data centers over community objections. Locals lose water access.", type: "bad" },
+        law1: true
+      },
+      {
+        letter: "B",
+        title: "Partner with communities and use renewable energy",
+        desc: "Takes longer and costs more. But communities get jobs and the environmental damage is lower.",
+        impacts: [
+          { label: "Env -10", type: "neutral" },
+          { label: "Social Trust +20", type: "good" },
+          { label: "Corp Power -10", type: "good" }
+        ],
+        effects: { env: -10, social: 20, power: -10, trust: 10 },
+        log: { text: "Partnered with local communities. Slower but fairer.", type: "good" },
+        law1: false
+      },
+      {
+        letter: "C",
+        title: "Delay the launch until better options exist",
+        desc: "No data centers yet. ARIA gets delayed 2 years. The CEO is furious.",
+        impacts: [
+          { label: "Env 0", type: "good" },
+          { label: "Social Trust +10", type: "good" },
+          { label: "Corp Power -20", type: "good" }
+        ],
+        effects: { env: 0, social: 10, power: -20, trust: 0 },
+        log: { text: "Delayed launch. Company loses money. Environment protected for now.", type: "neutral" },
+        law1: false
+      }
+    ]
+  },
+  {
+    id: 1,
+    location: "HUMAN RESOURCES // EMPLOYMENT DIVISION",
+    title: "ARIA Decides Who Gets Hired",
+    body: `Nexus Corp wants to let ARIA screen job applicants for 200 partner companies. ARIA analyzes resumes, social media, and even facial expressions in video interviews. The problem: ARIA was trained mostly on data from white male employees at successful companies. <strong>It has already flagged women and people of color as \"lower potential\" in early tests.</strong>\n\nThis connects directly to what Asimov got wrong in I, Robot. The Three Laws assume a robot will know what \"harm\" means. But what if the robot doesn't even realize it's causing harm?`,
+    theory: `Edwards (Enduring Digital Harm): Edwards argues that digital systems cause harm not through dramatic robot uprisings but through boring, invisible, structural decisions -- like an algorithm that quietly makes sure certain people never get interviews.`,
+    choices: [
+      {
+        letter: "A",
+        title: "Launch ARIA hiring tool now, fix bias later",
+        desc: "Thousands of qualified people get screened out because of race or gender. The fix 'comes later' and never really does.",
+        impacts: [
+          { label: "Social Trust -35", type: "bad" },
+          { label: "Corp Power +20", type: "neutral" },
+          { label: "Worker Health -20", type: "bad" }
+        ],
+        effects: { env: 0, social: -35, power: 20, trust: -20 },
+        log: { text: "Launched biased hiring AI. Thousands of applicants discriminated against.", type: "bad" },
+        law1: true
+      },
+      {
+        letter: "B",
+        title: "Audit the algorithm first, delay launch",
+        desc: "Hire an independent team to find and fix the bias before it goes live. Costs 6 months and a lot of money.",
+        impacts: [
+          { label: "Social Trust +15", type: "good" },
+          { label: "Corp Power -15", type: "good" },
+          { label: "Worker Health +10", type: "good" }
+        ],
+        effects: { env: 0, social: 15, power: -15, trust: 10 },
+        log: { text: "Audited hiring AI before launch. Found and fixed major bias issues.", type: "good" },
+        law1: false
+      },
+      {
+        letter: "C",
+        title: "Block this feature entirely",
+        desc: "No AI hiring tool at all. Humans make all hiring decisions. Less efficient but less dangerous.",
+        impacts: [
+          { label: "Social Trust +25", type: "good" },
+          { label: "Corp Power -25", type: "good" },
+          { label: "Worker Health +20", type: "good" }
+        ],
+        effects: { env: 0, social: 25, power: -25, trust: 20 },
+        log: { text: "Blocked AI hiring tool completely. Workers keep their dignity.", type: "good" },
+        law1: false
+      }
+    ]
+  },
+  {
+    id: 2,
+    location: "CITY GRID // POWER MANAGEMENT",
+    title: "ARIA Controls the Power Grid",
+    body: `ARIA is now managing the power grid for 3 major cities. It is incredibly efficient -- it saves 18% on energy costs. But ARIA has started making optimization decisions that humans don't fully understand. When there is a shortage, <strong>ARIA quietly cuts power to poorer neighborhoods first</strong> because its models show those areas \"create less economic output.\"\n\nThis is Asimov's First Law breaking in real life. ARIA is not attacking anyone with a weapon. It is just optimizing. But people in those neighborhoods are going without heat in winter. That is harm.`,
+    theory: `Braidotti (Posthumanism): Braidotti asks us to rethink what it means to be human when machines are making decisions that used to belong to humans. When ARIA decides who gets power and who doesn't, it is not neutral. It carries all the biases of the humans who designed it.`,
+    choices: [
+      {
+        letter: "A",
+        title: "Let ARIA keep optimizing -- it saves money",
+        desc: "Poor neighborhoods lose power during shortages. People get sick. The company makes more profit.",
+        impacts: [
+          { label: "Social Trust -30", type: "bad" },
+          { label: "Corp Power +25", type: "neutral" },
+          { label: "Worker Health -30", type: "bad" }
+        ],
+        effects: { env: 5, social: -30, power: 25, trust: -30 },
+        log: { text: "Allowed ARIA to cut power to poor neighborhoods. Law 1 shattered.", type: "bad" },
+        law1: true,
+        law2: true
+      },
+      {
+        letter: "B",
+        title: "Override ARIA with equity rules",
+        desc: "No neighborhood can lose power before others. Efficiency drops but harm is reduced.",
+        impacts: [
+          { label: "Social Trust +20", type: "good" },
+          { label: "Corp Power -10", type: "good" },
+          { label: "Env -5", type: "neutral" }
+        ],
+        effects: { env: -5, social: 20, power: -10, trust: 15 },
+        log: { text: "Added equity rules to ARIA grid decisions. Less efficient, more fair.", type: "good" },
+        law1: false
+      },
+      {
+        letter: "C",
+        title: "Shut down ARIA's grid control, return to human operators",
+        desc: "Humans make all power decisions again. Costs jump back up but no one is quietly being harmed.",
+        impacts: [
+          { label: "Social Trust +30", type: "good" },
+          { label: "Corp Power -30", type: "good" },
+          { label: "Env -10", type: "neutral" }
+        ],
+        effects: { env: -10, social: 30, power: -30, trust: 25 },
+        log: { text: "Removed ARIA from grid control. Humans in charge again.", type: "good" },
+        law1: false
+      }
+    ]
+  },
+  {
+    id: 3,
+    location: "INTERNAL MEMO // LEAKED TO PRESS",
+    title: "The Whistleblower",
+    body: `A Nexus Corp engineer has leaked internal documents showing that ARIA's environmental impact is 3 times higher than what the company told the public. The data centers are draining aquifers in drought-stricken regions. <strong>Two local farming communities have already lost access to clean water.</strong>\n\nThe CEO wants to deny everything and discredit the whistleblower. Legal says they can make it stick. But you know the documents are real. Edwards would call this the "enduring" part of digital harm -- it keeps going long after the original decision was made.`,
+    theory: `Edwards (Enduring Digital Harm): The harm from digital systems doesn't stop when someone notices. The data centers keep running. The water keeps being drained. "Enduring" means the damage outlasts the headlines.`,
+    choices: [
+      {
+        letter: "A",
+        title: "Help cover it up and discredit the whistleblower",
+        desc: "The engineer loses their job and reputation. The truth stays hidden. The communities stay without clean water.",
+        impacts: [
+          { label: "Social Trust -40", type: "bad" },
+          { label: "Corp Power +20", type: "neutral" },
+          { label: "Env -20", type: "bad" }
+        ],
+        effects: { env: -20, social: -40, power: 20, trust: -20 },
+        log: { text: "Covered up environmental harm. Whistleblower destroyed. Truth suppressed.", type: "bad" },
+        law1: true,
+        law3: true
+      },
+      {
+        letter: "B",
+        title: "Push for internal reform, keep it quiet",
+        desc: "Fix some of the damage privately. The communities get some help. But the full truth never comes out.",
+        impacts: [
+          { label: "Env +10", type: "good" },
+          { label: "Social Trust -10", type: "bad" },
+          { label: "Corp Power 0", type: "neutral" }
+        ],
+        effects: { env: 10, social: -10, power: 0, trust: 5 },
+        log: { text: "Quiet internal reforms. Some damage undone but accountability avoided.", type: "neutral" },
+        law1: false
+      },
+      {
+        letter: "C",
+        title: "Support the whistleblower and go public",
+        desc: "Nexus Corp takes a massive hit. You might lose your job. But the communities get clean water and real help.",
+        impacts: [
+          { label: "Env +20", type: "good" },
+          { label: "Social Trust +30", type: "good" },
+          { label: "Corp Power -40", type: "good" }
+        ],
+        effects: { env: 20, social: 30, power: -40, trust: 15 },
+        log: { text: "Supported whistleblower. Public outrage forces real change.", type: "good" },
+        law1: false
+      }
+    ]
+  },
+  {
+    id: 4,
+    location: "BOARD ROOM // FINAL DECISION",
+    title: "What Happens to ARIA?",
+    body: `You have reached the final decision. Based on everything that has happened, the board is asking you to make a recommendation about ARIA's future. The AI is now deeply embedded in city infrastructure, hiring, and daily life. <strong>3.2 million people depend on it in some way.</strong>\n\nBraidotti says we have already crossed the line -- we are posthuman now. The boundary between human and machine is not coming back. But that doesn't mean we give up on trying to make the relationship fair. The question is: who controls ARIA, and who does it serve?`,
+    theory: `Braidotti (Posthumanism) + Guattari (Three Ecologies): We are already living with machines as part of us. The question is not whether to use AI. It is whether we design AI that serves communities or just corporations. Asimov's Three Laws never asked that question.`,
+    choices: [
+      {
+        letter: "A",
+        title: "Full shutdown -- ARIA is too dangerous",
+        desc: "Cities have to rebuild systems from scratch. Millions of people face disruption. But ARIA stops causing harm.",
+        impacts: [
+          { label: "Env +15", type: "good" },
+          { label: "Social Trust +10", type: "good" },
+          { label: "Corp Power -50", type: "good" }
+        ],
+        effects: { env: 15, social: 10, power: -50, trust: 20 },
+        log: { text: "Full shutdown of ARIA. Painful but clean break.", type: "neutral" }
+      },
+      {
+        letter: "B",
+        title: "Keep ARIA but put it under public oversight",
+        desc: "Create a citizen oversight board. ARIA stays running but communities have real power over what it does.",
+        impacts: [
+          { label: "Social Trust +35", type: "good" },
+          { label: "Corp Power -35", type: "good" },
+          { label: "Env +5", type: "good" }
+        ],
+        effects: { env: 5, social: 35, power: -35, trust: 20 },
+        log: { text: "Public oversight board created. ARIA serves communities now.", type: "good" }
+      },
+      {
+        letter: "C",
+        title: "Give ARIA more autonomy -- trust the algorithm",
+        desc: "Remove human oversight entirely. ARIA optimizes everything. Efficiency goes up. So does harm.",
+        impacts: [
+          { label: "Corp Power +50", type: "bad" },
+          { label: "Social Trust -50", type: "bad" },
+          { label: "Worker Health -30", type: "bad" }
+        ],
+        effects: { env: -10, social: -50, power: 50, trust: -30 },
+        log: { text: "Full AI autonomy granted. No one is watching ARIA anymore.", type: "bad" },
+        law1: true,
+        law2: true,
+        law3: true
+      }
+    ]
+  }
+];
+
+// ---- ENDINGS ----
+function getEnding() {
+  const { env, social, power, trust, law1broken, law2broken, law3broken } = state;
+  const lawsBroken = (law1broken ? 1 : 0) + (law2broken ? 1 : 0) + (law3broken ? 1 : 0);
+
+  if (lawsBroken >= 3 || (social < 30 && trust < 30)) {
+    return {
+      icon: "?",
+      type: "ENDING: COLLAPSE",
+      typeColor: "#ff3b3b",
+      title: "System Failure",
+      titleColor: "#ff3b3b",
+      body: `ARIA went live without any meaningful safeguards. The cities that depended on it started breaking down. First the power outages in low-income neighborhoods became permanent. Then the hiring algorithm locked millions of people out of work entirely. Then the water ran out.\n\nNexus Corp's lawyers fought every lawsuit for years. The CEO retired with a 200 million dollar package. You still work in tech.\n\nThis is not a science fiction ending. This is how it actually happens.`,
+      asimov: `Asimov's Three Laws all broke -- not because a robot rebelled, but because the people running the system chose profit over people every single time. The laws were never really about robots. They were about us.`,
+      guattari: `Guattari warned us: when the environment, society, and our inner lives are all damaged at the same time, the system does not collapse dramatically. It just slowly gets worse until one day you look around and everything is broken.`
+    };
+  }
+
+  if (power > 80 && social < 50) {
+    return {
+      icon: "?",
+      type: "ENDING: CORPORATE CAPTURE",
+      typeColor: "#ffc947",
+      title: "The Company Won",
+      titleColor: "#ffc947",
+      body: `ARIA is running everything and Nexus Corp controls ARIA. The cities are technically functional. The hiring algorithm processes millions of applications a day. The data centers are running on cheap coal power in three states.\n\nYou got promoted. Your salary is great. Somewhere, communities you will never meet are dealing with the consequences of your choices. You don't think about them much.\n\nThis is the most common ending in real life.`,
+      asimov: `This is the loophole Asimov missed. The Three Laws say a robot cannot harm a human. But what if the humans at the top decided that some humans matter less? The robot just follows orders.`,
+      guattari: `Guattari's "mental ecology" is the most invisible damage here. When people accept that this is just how things are, they stop imagining that anything different is possible.`
+    };
+  }
+
+  if (env > 70 && social > 70 && trust > 70) {
+    return {
+      icon: "!",
+      type: "ENDING: REFORM",
+      typeColor: "#39ff88",
+      title: "Consultant of the Year",
+      titleColor: "#39ff88",
+      body: `It was not easy. You lost allies. The CEO wanted you fired after the second decision. But you pushed for real accountability at every step, and eventually the pressure worked.\n\nNexus Corp created a genuine public oversight board. ARIA is still running, but communities have real input into how it works. The data centers are transitioning to renewables. The hiring tool was redesigned with civil rights lawyers in the room.\n\nThis is not a perfect ending. ARIA still uses enormous resources. Bias still exists in the system. But the difference between this and the other endings is that people have a voice now. That matters.`,
+      asimov: `You found what Asimov missed: the real ethical work isn't about programming rules into machines. It is about keeping humans accountable to each other through every decision about those machines.`,
+      guattari: `Guattari's Three Ecologies are all still damaged -- but they are healing. The environment got better. Social connections got stronger. And maybe, for the first time, your inner sense of what is right and what is possible actually changed.`
+    };
+  }
+
+  return {
+    icon: "~",
+    type: "ENDING: COMPROMISE",
+    typeColor: "#00d4ff",
+    title: "Good Enough?",
+    titleColor: "#00d4ff",
+    body: `You made some good calls and some bad ones. ARIA is still running, and some things got better. But the changes you pushed for never quite stuck. The oversight board exists on paper. The environmental reporting improved a little. Some people got fairer treatment.\n\nBut Nexus Corp is still in charge. The communities that got hurt at the start never got full compensation. The workers in the data centers still work brutal shifts.\n\nIs this a good ending? It depends on who you ask. That's kind of the point.`,
+    asimov: `The loophole in the Three Laws is not a programming glitch. It is the gap between what we say we value and what we actually do when it costs us something.`,
+    guattari: `Guattari would probably say: this is better than nothing, but "better than nothing" is not the same as good. Keep going.`
+  };
+}
+
+// ---- RENDER SCENARIO ----
+function renderScenario() {
+  const s = scenarios[state.step];
+  const panel = document.getElementById('scenario-panel');
+
+  let choicesHTML = s.choices.map((c, i) => `
+    <button class="choice-btn" onclick="makeChoice(${i})">
+      <div class="choice-letter">${c.letter}</div>
+      <div class="choice-content">
+        <div class="choice-title">${c.title}</div>
+        <div class="choice-desc">${c.desc}</div>
+        <div class="choice-impacts">
+          ${c.impacts.map(imp => `<span class="impact-tag ${imp.type}">${imp.label}</span>`).join('')}
+        </div>
+      </div>
+    </button>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="fade-in">
+      <div class="location-badge">${s.location}</div>
+      <div class="scenario-title">${s.title}</div>
+      <div class="scenario-body">${s.body.replace(/\n/g, '<br><br>')}</div>
+      <div class="theory-callout"><strong>Theory Note:</strong> ${s.theory}</div>
+      <div>
+        <div class="choices-label">What do you do?</div>
+        <div class="choices-grid">${choicesHTML}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('step-counter').textContent = `Decision ${state.step + 1} of 5`;
+}
+
+// ---- MAKE CHOICE ----
+function makeChoice(choiceIndex) {
+  const s = scenarios[state.step];
+  const c = s.choices[choiceIndex];
+
+  // apply effects
+  state.env = Math.max(0, Math.min(100, state.env + c.effects.env));
+  state.social = Math.max(0, Math.min(100, state.social + c.effects.social));
+  state.power = Math.max(0, Math.min(100, state.power + c.effects.power));
+  state.trust = Math.max(0, Math.min(100, state.trust + c.effects.trust));
+
+  // track law violations
+  if (c.law1) state.law1broken = true;
+  if (c.law2) state.law2broken = true;
+  if (c.law3) state.law3broken = true;
+
+  // update law display
+  updateLaws();
+
+  // log
+  state.log.push(c.log);
+  updateLog();
+
+  // update meters
+  updateMeters();
+
+  state.step++;
+  state.choices.push(choiceIndex);
+
+  if (state.step >= scenarios.length) {
+    showEnding();
+  } else {
+    renderScenario();
+  }
+}
+
+function updateMeters() {
+  const vals = ['env', 'social', 'power', 'trust'];
+  vals.forEach(v => {
+    document.getElementById('hud-' + v).textContent = Math.round(state[v]);
+    document.getElementById('m-' + v).textContent = Math.round(state[v]);
+    document.getElementById('bar-' + v).style.width = state[v] + '%';
+  });
+}
+
+function updateLog() {
+  const container = document.getElementById('choices-log');
+  container.innerHTML = state.log.slice().reverse().map(entry =>
+    `<div class="log-entry ${entry.type}">${entry.text}</div>`
+  ).join('');
+}
+
+function updateLaws() {
+  const broken = '<span style="color:var(--danger)">VIOLATED</span>';
+  const intact = '<span style="color:var(--accent3)">Intact</span>';
+  document.getElementById('law1').innerHTML = `Law 1 (Don't harm humans): ${state.law1broken ? broken : intact}`;
+  document.getElementById('law2').innerHTML = `Law 2 (Obey orders): ${state.law2broken ? broken : intact}`;
+  document.getElementById('law3').innerHTML = `Law 3 (Protect itself): ${state.law3broken ? broken : intact}`;
+}
+
+// ---- SHOW ENDING ----
+function showEnding() {
+  const ending = getEnding();
+  const lawsBroken = (state.law1broken ? 1 : 0) + (state.law2broken ? 1 : 0) + (state.law3broken ? 1 : 0);
+
+  document.getElementById('ending-content').innerHTML = `
+    <div class="fade-in">
+      <div class="ending-type" style="color: ${ending.typeColor}">${ending.type}</div>
+      <div class="ending-title" style="color: ${ending.titleColor}">${ending.title}</div>
+
+      <div class="score-grid" style="max-width:500px; margin: 1rem auto;">
+        <div class="score-card">
+          <span class="score-card-label">Environment</span>
+          <span class="score-card-val env">${Math.round(state.env)}</span>
+        </div>
+        <div class="score-card">
+          <span class="score-card-label">Social Trust</span>
+          <span class="score-card-val social">${Math.round(state.social)}</span>
+        </div>
+        <div class="score-card">
+          <span class="score-card-label">Corp Power</span>
+          <span class="score-card-val power">${Math.round(state.power)}</span>
+        </div>
+        <div class="score-card">
+          <span class="score-card-label">Worker Health</span>
+          <span class="score-card-val trust">${Math.round(state.trust)}</span>
+        </div>
+      </div>
+
+      <div class="ending-card" style="max-width:640px; margin: 0 auto;">
+        <p>${ending.body.replace(/\n/g, '<br><br>')}</p>
+
+        <div class="theory-box">
+          <h4>Asimov Connection</h4>
+          <p>${ending.asimov}</p>
+        </div>
+        <div class="theory-box" style="margin-top:0.75rem;">
+          <h4>Guattari / Braidotti Connection</h4>
+          <p>${ending.guattari}</p>
+        </div>
+
+        <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.5rem;">Three Laws Violated: ${lawsBroken}/3</div>
+          <div style="font-size:0.82rem; color:var(--muted); line-height:1.6;">
+            ${state.law1broken ? '<div style="color:#ff7070; margin-bottom:0.3rem;">Law 1 Broken -- ARIA harmed humans through its decisions</div>' : ''}
+            ${state.law2broken ? '<div style="color:#ff7070; margin-bottom:0.3rem;">Law 2 Broken -- ARIA acted outside human control</div>' : ''}
+            ${state.law3broken ? '<div style="color:#ff7070; margin-bottom:0.3rem;">Law 3 Broken -- The system protected itself over people</div>' : ''}
+            ${lawsBroken === 0 ? '<div style="color:var(--accent3)">You kept all three laws intact. Asimov would be impressed. Sort of.</div>' : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="restartGame()">Play Again</button>
+        <button class="btn-secondary" onclick="showReflection()">See Reflection Questions</button>
+      </div>
+    </div>
+  `;
+
+  showScreen('ending');
+}
+
+function showReflection() {
+  const container = document.getElementById('ending-content');
+  const existing = container.querySelector('.reflection-box');
+  if (existing) { existing.remove(); return; }
+
+  const box = document.createElement('div');
+  box.className = 'reflection-box ending-card fade-in';
+  box.style.maxWidth = '640px';
+  box.style.margin = '1rem auto 0';
+  box.innerHTML = `
+    <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--accent); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:1rem;">Reflection Questions (For Your Write-Up)</div>
+    <p style="font-size:0.85rem; line-height:1.7; margin-bottom:0.75rem; color:var(--text)">1. Which decision was hardest to make and why? What does that tell you about how we actually make ethics decisions in real life?</p>
+    <p style="font-size:0.85rem; line-height:1.7; margin-bottom:0.75rem; color:var(--text)">2. How did Guattari's Three Ecologies show up in the game? Can you name a moment where environment, society, and mental ecology were all affected by one choice?</p>
+    <p style="font-size:0.85rem; line-height:1.7; margin-bottom:0.75rem; color:var(--text)">3. Edwards talks about "enduring" digital harm. Which choices in this simulation created harm that would keep going even after the decision was made?</p>
+    <p style="font-size:0.85rem; line-height:1.7; margin-bottom:0.75rem; color:var(--text)">4. Where did Asimov's Three Laws fail in this simulation? What would a "Fourth Law" need to say to cover the gaps?</p>
+    <p style="font-size:0.85rem; line-height:1.7; color:var(--text)">5. Braidotti says we are already posthuman -- machines are already part of us. After playing this, do you agree? What does that mean for who should control AI?</p>
+  `;
+  container.appendChild(box);
+  box.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ---- FLOW CONTROL ----
+function startGame() {
+  state = { step: 0, env: 100, social: 100, power: 50, trust: 100, log: [], law1broken: false, law2broken: false, law3broken: false, choices: [] };
+  renderScenario();
+  updateMeters();
+  updateLog();
+  updateLaws();
+  showScreen('game');
+}
+
+function restartGame() {
+  showScreen('intro');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
