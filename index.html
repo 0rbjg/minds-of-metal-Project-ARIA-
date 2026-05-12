@@ -1029,6 +1029,21 @@ function getEnding() {
     };
   }
 
+
+  // SECRET ENDING: The Quiet Reformer -- pick B on every single scenario
+  if (state.choices.length === 5 && state.choices.every(c => c === 1)) {
+    return {
+      icon: "★",
+      type: "SECRET ENDING: THE QUIET REFORMER",
+      typeColor: "#ff00ff",
+      title: "You Found the Hidden Path",
+      titleColor: "#ff00ff",
+      body: `Nobody expected you to survive this long.\n\nEvery time the easy answer was to go all in -- on profit, on radical shutdown, on public warfare with the company -- you chose the harder middle path. You audited instead of launching. You added equity rules instead of shutting the grid down. You pushed for quiet reform instead of burning it down. You supported public oversight instead of pulling the plug.\n\nThe CEO never liked you. Activists called you a sellout. The board called you annoying. But five decisions later, ARIA is still running -- and for the first time, the people it affects actually have a seat at the table.\n\nThis is the hardest ending to reach because it requires believing that imperfect progress is still progress. Most people don't.\n\n>>> You found the secret ending. Most players never do. <<<`,
+      asimov: `Asimov's Three Laws assumed ethics was a clean set of rules you program in once. You proved it's a process. You stayed in the room every time it would have been easier to walk out.`,
+      guattari: `Guattari's Three Ecologies -- environment, society, and the self -- all moved in the same direction for once. Not because you fixed everything. But because you kept choosing to try.`
+    };
+  }
+
   if (env > 70 && social > 70 && trust > 70) {
     return {
       icon: "!",
@@ -1252,3 +1267,5 @@ function showScreen(id) {
 </script>
 </body>
 </html>
+index (1).html
+Displaying index (1).html.
